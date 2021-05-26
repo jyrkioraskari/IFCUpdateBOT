@@ -10,8 +10,6 @@
 
 	<properties>
 		<edit_ifc_project.version>0.1</edit_ifc_project.version>
-		<maven.compiler.source>1.8</maven.compiler.source>
-		<maven.compiler.target>1.8</maven.compiler.target>
 	</properties>
 
 	<developers>
@@ -54,8 +52,6 @@
 			<artifactId>guava</artifactId>
 			<version>[24.1.1,)</version>
 		</dependency>
-		<!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-core -->
-		<!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-databind -->
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-databind</artifactId>
@@ -67,17 +63,29 @@
 			<artifactId>ifcplugins</artifactId>
 			<version>0.0.99</version>
 		</dependency>
+
+		<dependency>
+			<groupId>org.opensourcebim</groupId>
+			<artifactId>bimserver</artifactId>
+			<version>1.5.182</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.json/json -->
+		<dependency>
+			<groupId>org.json</groupId>
+			<artifactId>json</artifactId>
+			<version>20210307</version>
+		</dependency>
+
 	</dependencies>
 	<build>
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-enforcer-plugin</artifactId>
-				<version>1.4.1</version>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.8.0</version>
 				<configuration>
-					<rules>
-						<dependencyConvergence />
-					</rules>
+					<release>11</release>
 				</configuration>
 			</plugin>
 		</plugins>
