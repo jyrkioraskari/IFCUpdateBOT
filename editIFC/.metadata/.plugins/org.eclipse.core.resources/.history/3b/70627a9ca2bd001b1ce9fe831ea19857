@@ -1,0 +1,31 @@
+package de.rwth_aachen.dc.ifc;
+
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
+import org.bimserver.emf.PackageMetaData;
+import org.bimserver.emf.Schema;
+import org.bimserver.ifc.step.deserializer.Ifc2x3tc1StepStreamingDeserializer;
+import org.bimserver.models.ifc2x3tc1.Ifc2x3tc1Package;
+import org.bimserver.shared.QueryContext;
+
+public class IfcModel2x3 {
+	public IfcModel2x3(Path ifcFilePath, Path ifcShcemaDirectory) {
+		// Example
+		BimServerConfig config = new BimServerConfig();
+		config.setStartEmbeddedWebServer(false);
+		config.setHomeDir(new File("[LOCATION]"));
+		config.setResourceFetcher(new LocalDevelopmentResourceFetcher(new File("[LOCATION]")));
+		config.setClassPath(System.getProperty("java.class.path"));
+		config.setPort(8080);
+		config.setStartCommandLine(false);
+		config.setLocalDev(true);
+		config.setAutoMigrate(false);
+	}
+
+	public static void main(String[] args) {
+		new IfcModel2x3(Paths.get("c:\\ifc\\20180731Dubal Herrera limpio.ifc"), Paths.get("."));
+	}
+}

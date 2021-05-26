@@ -1,0 +1,12 @@
+package de.rwth_aachen.dc.ifc;
+
+public class IfcModel {
+    public IfcModel()
+    {
+    	
+    }
+	
+	public static void main(String[] args) {
+		new IfcModel();
+	}
+}

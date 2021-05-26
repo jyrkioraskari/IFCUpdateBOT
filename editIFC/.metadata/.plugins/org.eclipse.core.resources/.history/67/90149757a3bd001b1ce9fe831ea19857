@@ -1,0 +1,42 @@
+package de.rwth_aachen.dc.ifc;
+
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
+import org.bimserver.BimServer;
+import org.bimserver.BimServerConfig;
+import org.bimserver.BimserverDatabaseException;
+import org.bimserver.database.DatabaseRestartRequiredException;
+import org.bimserver.database.berkeley.DatabaseInitException;
+import org.bimserver.shared.LocalDevelopmentResourceFetcher;
+import org.bimserver.shared.exceptions.PluginException;
+import org.bimserver.shared.exceptions.ServerException;
+
+public class IfcModel2x3 {
+	public IfcModel2x3(Path ifcFilePath, Path ifcShcemaDirectory) {
+		// Example
+		BimServerConfig config = new BimServerConfig();
+		config.setStartEmbeddedWebServer(false);
+		config.setHomeDir(Paths.get("c:\\temp"));
+		config.setResourceFetcher(new LocalDevelopmentResourceFetcher(Paths.get("[LOCATION]")));
+		config.setClassPath(System.getProperty("java.class.path"));
+		config.setPort(8080);
+		config.setStartCommandLine(false);
+		config.setLocalDev(true);
+		config.setAutoMigrate(false);
+		System.out.println("1");
+		BimServer bimServer = new BimServer(config);
+		try {
+			System.out.println(2);
+			bimServer.start();
+			System.out.println(3);
+		} catch (ServerException | DatabaseInitException | BimserverDatabaseException | PluginException
+				| DatabaseRestartRequiredException e) {
+			e.printStackTrace();
+		}	
+	}
+
+	public static void main(String[] args) {
+		new IfcModel2x3(Paths.get("c:\\ifc\\20180731Dubal Herrera limpio.ifc"), Paths.get("."));
+	}
+}

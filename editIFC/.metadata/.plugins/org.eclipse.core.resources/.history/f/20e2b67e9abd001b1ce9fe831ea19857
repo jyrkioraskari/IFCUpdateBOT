@@ -1,0 +1,14 @@
+package de.rwth_aachen.dc.ifc;
+
+import org.bimserver.ifc.step.serializer.Ifc2x3tc1StepStreamingSerializer;
+
+public class IfcModel {
+    public IfcModel()
+    {
+    	Ifc2x3tc1StepStreamingSerializer is=new Ifc2x3tc1StepStreamingSerializer();
+    }
+	
+	public static void main(String[] args) {
+		new IfcModel();
+	}
+}

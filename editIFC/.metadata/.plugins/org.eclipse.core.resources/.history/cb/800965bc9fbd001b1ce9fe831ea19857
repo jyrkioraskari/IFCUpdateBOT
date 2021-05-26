@@ -1,0 +1,44 @@
+package de.rwth_aachen.dc.ifc;
+
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
+import org.bimserver.emf.PackageMetaData;
+import org.bimserver.emf.Schema;
+import org.bimserver.ifc.step.deserializer.Ifc2x3tc1StepStreamingDeserializer;
+import org.bimserver.ifc.step.serializer.Ifc2x3tc1StepStreamingSerializer;
+import org.bimserver.models.ifc2x3tc1.Ifc2x3tc1Package;
+import org.bimserver.plugins.PluginConfiguration;
+import org.bimserver.shared.QueryContext;
+
+public class IfcModel2x3 {
+	public IfcModel2x3(Path ifcFilePath, Path ifcShcemaDirectory) {
+		if (ifcFilePath.toFile().exists() && ifcFilePath.toFile().isFile()) {
+
+			Ifc2x3tc1StepStreamingDeserializer deserializer = new Ifc2x3tc1StepStreamingDeserializer();
+
+			PackageMetaData pmd2x3 = new PackageMetaData(Ifc2x3tc1Package.eINSTANCE, Schema.IFC2X3TC1,
+					ifcShcemaDirectory);
+
+			deserializer.init(pmd2x3);
+			try {
+				try (InputStream fis = Files.newInputStream(ifcFilePath)) {
+					QueryContext reusable=new QueryContext();
+					deserializer.read(fis, ifcFilePath.getFileName().toString(), Files.size(ifcFilePath), null);
+				}
+
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+
+			// Ifc2x3tc1StepStreamingSerializer is=new Ifc2x3tc1StepStreamingSerializer(new
+			// PluginConfiguration());
+		}
+	}
+
+	public static void main(String[] args) {
+		new IfcModel2x3(Paths.get("c:\\ifc\\20180731Dubal Herrera limpio.ifc"), Paths.get("."));
+	}
+}

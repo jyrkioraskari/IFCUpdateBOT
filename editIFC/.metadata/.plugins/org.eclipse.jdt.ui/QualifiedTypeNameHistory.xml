@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<qualifiedTypeNameHistroy>
+<fullyQualifiedTypeName name="de.rwth_aachen.dc.ifc.IfcModel"/>
+<fullyQualifiedTypeName name="java.io.File"/>
+<fullyQualifiedTypeName name="org.bimserver.shared.interfaces.ServiceInterface"/>
+<fullyQualifiedTypeName name="org.json.JSONObject"/>
+<fullyQualifiedTypeName name="org.json.JSONArray"/>
+<fullyQualifiedTypeName name="java.io.FileReader"/>
+<fullyQualifiedTypeName name="java.nio.file.Path"/>
+<fullyQualifiedTypeName name="com.google.common.io.Files"/>
+<fullyQualifiedTypeName name="java.nio.file.Files"/>
+<fullyQualifiedTypeName name="org.bimserver.models.ifc2x3tc1.IfcProduct"/>
+<fullyQualifiedTypeName name="org.bimserver.models.ifc2x3tc1.IfcValue"/>
+<fullyQualifiedTypeName name="org.bimserver.utils.IfcUtils"/>
+</qualifiedTypeNameHistroy>

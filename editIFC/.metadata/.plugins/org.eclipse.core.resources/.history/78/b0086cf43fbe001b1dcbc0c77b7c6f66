@@ -1,0 +1,13 @@
+package de.rwth_aachen.dc.ifc;
+
+public class ParseJoC {
+
+	public ParseJoC()
+	{
+		
+	}
+	public static void main(String[] args) {
+		new ParseJoC();
+	}
+
+}

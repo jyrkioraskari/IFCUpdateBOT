@@ -1,0 +1,32 @@
+{
+  "changes":[ 
+   { 
+      "property_label" : { 
+         "value" : "Reference", 
+         "type" : "literal" 
+      }, 
+      "property_uri" : { 
+         "value" : "http://dico-po-bim.fr/property#reference", 
+
+
+         "type" : "uri" 
+      }, 
+      "object_name" : { 
+         "value" : "1 Vantail - Imposte haute:1.20m x 2.40m:216195", 
+         "type" : "literal" 
+      }, 
+      "property_value" : { 
+         "type" : "literal", 
+         "value" : "Tribe-S95" 
+      }, 
+      "object_uri" : { 
+         "value" : "http://linkedbuildingdata.net/ifc/resources2bb9c692/IfcWindow_315283", 
+         "type" : "uri" 
+      }, 
+      "object_guid" : { 
+         "type" : "literal", 
+         "value" : "3deWnGLkL9vgC7yeRktBOX" 
+      } 
+   } 
+] 
+}

@@ -1,0 +1,48 @@
+package de.rwth_aachen.dc.ifc;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Set;
+
+import org.bimserver.emf.IfcModelInterface;
+import org.bimserver.models.ifc2x3tc1.IfcProduct;
+import org.bimserver.utils.IfcUtils;
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+public class ParseJoC {
+
+	public ParseJoC() throws IOException {
+		IfcModelInstance model = new IfcModelInstance();
+		// IFC2x3
+		IfcModelInterface ifcmodel2x3 = model.readModel(
+				Paths.get("./src/main/resources/BIM4REN_FrenchPilot_Residence-DUNANT-Rueil_5levels_2x3.ifc"),
+				Paths.get("."));
+		ifcmodel2x3.resetExpressIds();
+		ifcmodel2x3.fixOidCounter();
+
+		Path fileName = Path.of("./src/main/resources/CSTB_JoC-example.json");
+		String jsonString = Files.readString(fileName);
+		JSONObject obj = new JSONObject(jsonString);
+
+		JSONArray arr = obj.getJSONArray("changes");
+		for (int i = 0; i < arr.length(); i++) {
+			String guid = arr.getJSONObject(i).getJSONObject("object").getString("id");
+			String property_label = arr.getJSONObject(i).getJSONObject("property").getString("label");
+			String value = arr.getJSONObject(i).getString("value");
+			System.out.println(guid + " :" + property_label + " :" + value);
+
+			IfcProduct product = (IfcProduct) ifcmodel2x3.getByGuid("1hOSvn6df7F8_7GcBWlR72");
+			System.out.println(product);
+			Set<String> properties = IfcUtils.listPropertyNames(product);
+			System.out.println(properties);
+		}
+	}
+
+	public static void main(String[] args) throws IOException {
+		new ParseJoC();
+	}
+
+}
