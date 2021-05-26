@@ -99,7 +99,7 @@ public class IfcModelInstance {
 		case IFC2x3:
 			Ifc2x3tc1StepSerializer serializer1 = new Ifc2x3tc1StepSerializer(new PluginConfiguration());
 			try {
-				serializer1.init(model, null, false);
+				serializer1.init(model, null, true);
 				serializer1.writeToFile(ifcFilePath, null);
 			} catch (SerializerException e) {
 				e.printStackTrace();
@@ -109,7 +109,7 @@ public class IfcModelInstance {
 		case IFC4:
 			Ifc4StepSerializer serializer2 = new Ifc4StepSerializer(new PluginConfiguration());
 			try {
-				serializer2.init(model, null, false);
+				serializer2.init(model, null, true);
 				serializer2.writeToFile(ifcFilePath, null);
 			} catch (SerializerException e) {
 				e.printStackTrace();
@@ -211,18 +211,18 @@ public class IfcModelInstance {
 			Object value) throws IfcModelInterfaceException {
 		IfcRelDefinesByProperties ifcRelDefinesByProperties = model.create(IfcRelDefinesByProperties.class);
 		product.getIsDefinedBy().add(ifcRelDefinesByProperties);
-		IfcPropertySet propertySet = model.create(IfcPropertySet.class);
+		IfcPropertySet propertySet = model.createAndAdd(IfcPropertySet.class);
 		ifcRelDefinesByProperties.setRelatingPropertyDefinition(propertySet);
-		IfcPropertySingleValue property = model.create(IfcPropertySingleValue.class);
+		IfcPropertySingleValue property = model.createAndAdd(IfcPropertySingleValue.class);
 		propertySet.getHasProperties().add(property);
 		property.setName(name);
 		property.setDescription(description);
 		if (value instanceof Boolean) {
-			IfcBoolean ifcValue = model.create(IfcBoolean.class);
+			IfcBoolean ifcValue = model.createAndAdd(IfcBoolean.class);
 			ifcValue.setWrappedValue(((Boolean) value) ? Tristate.TRUE : Tristate.FALSE);
 			property.setNominalValue(ifcValue);
 		} else {
-			IfcText ifcValue = model.create(IfcText.class);
+			IfcText ifcValue = model.createAndAdd(IfcText.class);
 			ifcValue.setWrappedValue((String) value);
 			property.setNominalValue(ifcValue);
 		}
@@ -285,16 +285,22 @@ public class IfcModelInstance {
 						.getRelatingPropertyDefinition();
 				if (propertySetDefinition instanceof IfcPropertySet) {
 					if (propertySetDefinition.getName().equals(propertySetName)) {
+						
 						System.out.println("Found property set");
 						IfcPropertySet ifcPropertySet = (IfcPropertySet) propertySetDefinition;
-						IfcPropertySingleValue property = model.create(IfcPropertySingleValue.class);
+						System.out.println("pset class: c "+ifcPropertySet.getClass().getName());
+						IfcPropertySingleValue property = model.createAndAdd(IfcPropertySingleValue.class);
 						System.out.println("property: "+property);
 						property.setName(name);
 						property.setDescription(description);
-						IfcText ifcValue = model.create(IfcText.class);
+						
+						IfcText ifcValue = model.createAndAdd(IfcText.class);			
 						ifcValue.setWrappedValue((String) value);
 						property.setNominalValue(ifcValue);
-						ifcPropertySet.getHasProperties().add(property);
+						
+						boolean added = ifcPropertySet.getHasProperties().add(property);
+						System.out.println("added: "+added);
+						
 					}
 				}
 			}
@@ -310,7 +316,32 @@ public class IfcModelInstance {
 
 		List<IfcWindow> windows = ifcmodel2x3.getAll(IfcWindow.class);
 		System.out.println("windows: " + windows.size());
-		IfcProperty ttproperty = null;
+		//IfcProperty ttproperty = null;
+		//ttproperty = addThermalTransmittance(windows, ttproperty);
+
+		for (IfcWindow w : windows) {
+			System.out.println(w.getGlobalId() + ":");
+			try {
+				IfcModelInstance.createToPropertySet(ifcmodel2x3, w, "Pset_WindowCommon", "MyProperty",
+						"Description", "Own value");
+				//IfcModelInstance.createProperty(w, ifcmodel2x3,"MyProperty","desc","123");
+				Set<String> properties = IfcUtils.listPropertyNames(w);
+
+				properties=IfcUtils.listPropertyNames(w);
+				System.out.println(properties);
+				System.out.println(IfcUtils.getStringProperty(w, "MyProperty"));
+				break;
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+
+		model.saveModel(ifcmodel2x3, Paths.get("c:\\temp\\output10.ifc"));
+
+
+	}
+
+	private static IfcProperty addThermalTransmittance(List<IfcWindow> windows, IfcProperty ttproperty) {
 		for (IfcWindow w : windows) {
 			System.out.println(w.getGlobalId() + ":");
 			Set<String> properties = IfcUtils.listPropertyNames(w);
@@ -334,59 +365,42 @@ public class IfcModelInstance {
 				// w.setOverallHeightAsString("1.63");
 			}
 		}
-
-		for (IfcWindow w : windows) {
-			System.out.println(w.getGlobalId() + ":");
-			Set<String> properties = IfcUtils.listPropertyNames(w);
-			System.out.println(properties);
-			if (!IfcUtils.hasProperty(w, "ThermalTransmittance")) {
-				IfcModelInstance.copyToPropertySet(w, "Pset_WindowCommon", ttproperty);
-				System.out.println("has tt: " + IfcUtils.hasProperty(w, "ThermalTransmittance"));
-			}
-
-			try {
-				IfcModelInstance.createToPropertySet(ifcmodel2x3, w, "Pset_WindowCommon", "MyProperty",
-						"Description", "Own value");
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}
-
-		model.saveModel(ifcmodel2x3, Paths.get("c:\\temp\\output5	.ifc"));
-
-		/*
-		 * IfcProduct product =
-		 * (IfcProduct)ifcmodel2x3.getByGuid("1hOSvn6df7F8_7GcBWlR72");
-		 * System.out.println(product); Set<String>
-		 * properties=IfcUtils.listPropertyNames(product);
-		 * System.out.println(properties);
-		 * 
-		 * System.out.println(IfcUtils.hasProperty(product, "OmniClass Title"));
-		 * System.out.println(IfcUtils.getStringProperty(product, "OmniClass Title"));
-		 * 
-		 * IfcModelInstance.setStringProperty(ifcmodel2x3, product,
-		 * "OmniClass Title","123");
-		 * System.out.println(IfcUtils.getStringProperty(product, "OmniClass Title"));
-		 * 
-		 * try { IfcModelInstance.createProperty(product, ifcmodel2x3,
-		 * "My own property","Description", "Own value"); } catch
-		 * (IfcModelInterfaceException e) { e.printStackTrace(); }
-		 * System.out.println(IfcUtils.getStringProperty(product, "My own property"));
-		 * 
-		 * Set<String> properties2=IfcUtils.listPropertyNames(product);
-		 * System.out.println(properties2);
-		 * 
-		 * IfcModelInstance.removeProperty(ifcmodel2x3, product, "My own property");
-		 * 
-		 * Set<String> properties3=IfcUtils.listPropertyNames(product);
-		 * System.out.println(properties3);
-		 * 
-		 */
-		// IFC4
-		// IfcModelInterface ifcmodel4
-		// =model.readModel(Paths.get("c:\\ifc\\20160125Autodesk_Hospital_Parking
-		// Garage_2015 - IFC4.ifc"), Paths.get("."));
-		// System.out.println(ifcmodel4.size());
-
+		return ttproperty;
 	}
+	
+	
+	/*
+	 * IfcProduct product =
+	 * (IfcProduct)ifcmodel2x3.getByGuid("1hOSvn6df7F8_7GcBWlR72");
+	 * System.out.println(product); Set<String>
+	 * properties=IfcUtils.listPropertyNames(product);
+	 * System.out.println(properties);
+	 * 
+	 * System.out.println(IfcUtils.hasProperty(product, "OmniClass Title"));
+	 * System.out.println(IfcUtils.getStringProperty(product, "OmniClass Title"));
+	 * 
+	 * IfcModelInstance.setStringProperty(ifcmodel2x3, product,
+	 * "OmniClass Title","123");
+	 * System.out.println(IfcUtils.getStringProperty(product, "OmniClass Title"));
+	 * 
+	 * try { IfcModelInstance.createProperty(product, ifcmodel2x3,
+	 * "My own property","Description", "Own value"); } catch
+	 * (IfcModelInterfaceException e) { e.printStackTrace(); }
+	 * System.out.println(IfcUtils.getStringProperty(product, "My own property"));
+	 * 
+	 * Set<String> properties2=IfcUtils.listPropertyNames(product);
+	 * System.out.println(properties2);
+	 * 
+	 * IfcModelInstance.removeProperty(ifcmodel2x3, product, "My own property");
+	 * 
+	 * Set<String> properties3=IfcUtils.listPropertyNames(product);
+	 * System.out.println(properties3);
+	 * 
+	 */
+	// IFC4
+	// IfcModelInterface ifcmodel4
+	// =model.readModel(Paths.get("c:\\ifc\\20160125Autodesk_Hospital_Parking
+	// Garage_2015 - IFC4.ifc"), Paths.get("."));
+	// System.out.println(ifcmodel4.size());
+
 }
