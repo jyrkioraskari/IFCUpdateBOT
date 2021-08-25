@@ -9,6 +9,6 @@
 		</swagger>
 	</modules>
 	<api-classes>
-	   <include pattern="de.rwth_aachen.dc.bimserver.rest.*"/>
+	   <include pattern="de.rwth_aachen.dc.uploadbot.rest.*"/>	                     
 	</api-classes>
 </enunciate>

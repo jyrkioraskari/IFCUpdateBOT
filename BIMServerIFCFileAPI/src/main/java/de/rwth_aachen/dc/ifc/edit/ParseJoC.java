@@ -18,19 +18,23 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 public class ParseJoC {
+	final IfcModelInstance model;
+	final IfcModelInterface model_interface; 
 
-	public ParseJoC() throws IOException {
-		IfcModelInstance model = new IfcModelInstance();
+	public ParseJoC(Path ifc_file,Path joc_file) throws IOException {
+		this.model = new IfcModelInstance();
 		// IFC2x3
 		IfcModelInterface ifcmodel2x3 = model
-				.readModel(Paths.get("./src/main/resources/BIM4Ren_DUNANT_cleaned_IFC2x3.ifc"), Paths.get("."));
+				.readModel(ifc_file, Paths.get("."));
 		ifcmodel2x3.resetExpressIds();
 		ifcmodel2x3.fixOidCounter();
+		this.model_interface=ifcmodel2x3;
 
-		String jsonString = readFile("./src/main/resources/CSTB_JoC-example.json");
+		String jsonString = readFile(joc_file.toAbsolutePath().toString());
 		execute(ifcmodel2x3, jsonString);
 		System.out.println("--------------------------------------");
-		execute(ifcmodel2x3, jsonString);
+		//execute(ifcmodel2x3, jsonString);
+		
 	}
 	
 	
@@ -40,6 +44,19 @@ public class ParseJoC {
 	    return FileUtils.readFileToString(file);
 	}
 
+	public File saveModel()
+	{
+		File tmp_file;
+		try {
+			tmp_file = File.createTempFile("ifc", ".ttl");
+			model.saveModel(this.model_interface, Paths.get(tmp_file.getAbsolutePath()));
+			return tmp_file;
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
 	private void execute(IfcModelInterface ifcmodel2x3, String jsonString) {
 		JSONObject obj = new JSONObject(jsonString);
 
@@ -96,7 +113,7 @@ public class ParseJoC {
 	}
 
 	public static void main(String[] args) throws IOException {
-		new ParseJoC();
+		
 	}
 
 }
