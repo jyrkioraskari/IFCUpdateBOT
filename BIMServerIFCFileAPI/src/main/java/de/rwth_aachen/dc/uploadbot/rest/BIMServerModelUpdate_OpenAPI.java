@@ -41,6 +41,11 @@ public class BIMServerModelUpdate_OpenAPI {
 	UpdateBotManager update_manager = new UpdateBotManager();
 	
 
+	
+	
+	/**
+	 * The Open BIMserver BIM Bot description specification of the services
+	 */
 	@GET
 	@Path("/services")
 	@Produces(MediaType.APPLICATION_JSON)
@@ -60,6 +65,14 @@ public class BIMServerModelUpdate_OpenAPI {
 	
 	
 
+
+	/**
+	 * This Service edits building model property set data following a change description.
+	 * 
+	 * @param ifcFile An Industry Foundation Classes (IFC) in STEP format: IFC 2x3 and IFC4
+	 * @param jocFile A Journal of Changes description file in Nobatec JSON format.
+	 * @return Updated file
+	 */
 	@POST
 	@Path("/update")
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
@@ -91,6 +104,17 @@ public class BIMServerModelUpdate_OpenAPI {
 		return Response.noContent().build();
 	}
 
+	/**
+	 * The service uploads a building model to the default project background BIMserver instance. If a
+	 * project already exists and is not deleted, a new release is created. In the case the project is
+	 * deleted a new project with a time stamp is created.
+	 * 
+	 * This uses a tread, which means that the call is not blocking. It may take a minute or two to
+	 * see the update on the BIMserver user interface. Only one concurrent update a time is allowed per a project.
+	 * 
+	 * @param ifcFile ifcFile An Industry Foundation Classes (IFC) in STEP MULTIPART_FORM_DATA format: IFC 2x3 and IFC4
+	 * @return Status
+	 */
 	@POST
 	@Path("/upload")
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
@@ -113,6 +137,17 @@ public class BIMServerModelUpdate_OpenAPI {
 	
 	
 
+	/**
+	 * The service uploads a building model to the default project background BIMserver instance. If a
+	 * project already exists and is not deleted, a new release is created. In the case the project is
+	 * deleted a new project with a time stamp is created.
+	 * 
+	 * This uses a tread, which means that the call is not blocking. It may take a minute or two to
+	 * see the update on the BIMserver user interface. Only one concurrent update a time is allowed per a project.
+	 * 
+	 * @param ifcFile ifcFile An Industry Foundation Classes (IFC) in STEP TEXT format: IFC 2x3 and IFC4
+	 * @return Status
+	 */
 	@POST
 	@Path("/upload")
 	@Consumes({ MediaType.TEXT_PLAIN, "application/ifc" })
@@ -138,7 +173,18 @@ public class BIMServerModelUpdate_OpenAPI {
 		return Response.noContent().build();
 	}
 	
-	
+	/**
+	 * The service uploads a building model to the BIMserver "project_id" project background BIMserver instance. If a
+	 * project already exists and is not deleted, a new release is created. In the case the project is
+	 * deleted a new project with a time stamp is created.
+	 * 
+	 * This uses a tread, which means that the call is not blocking. It may take a minute or two to
+	 * see the update on the BIMserver user interface. Only one concurrent update a time is allowed per a project.
+	 * 
+	 * @param ifcFile ifcFile An Industry Foundation Classes (IFC) in STEP MULTIPART_FORM_DATA format: IFC 2x3 and IFC4
+	 * @param project_id The unique project identifier or name in BIMserver.
+	 * @return Status
+	 */
 	@POST
 	@Path("/upload/{project_id}")
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
@@ -160,7 +206,18 @@ public class BIMServerModelUpdate_OpenAPI {
 	}
 	
 	
-	
+	/**
+	 * The service uploads a building model to the BIMserver "project_id"  project background BIMserver instance. If a
+	 * project already exists and is not deleted, a new release is created. In the case the project is
+	 * deleted a new project with a time stamp is created.
+	 * 
+	 * This uses a tread, which means that the call is not blocking. It may take a minute or two to
+	 * see the update on the BIMserver user interface. Only one concurrent update a time is allowed per a project.
+	 * 
+	 * @param ifcFile ifcFile An Industry Foundation Classes (IFC) in STEP TEXT format: IFC 2x3 and IFC4
+	 * @param project_id The unique project identifier or name in BIMserver.
+	 * @return Status
+	 */
 	@POST
 	@Path("/upload/{project_id}")
 	@Consumes({ MediaType.TEXT_PLAIN, "application/ifc" })
@@ -188,6 +245,11 @@ public class BIMServerModelUpdate_OpenAPI {
 	
 	
 
+	/**
+	 * The service allows a user to download the latest building model release of the default project in the background BIMserver.
+	 * 
+	 * @return ifcFile ifcFile An Industry Foundation Classes (IFC) in STEP MULTIPART_FORM_DATA format: IFC 2x3 and IFC4
+	 */
 	@GET
 	@Path("/download")
 	@Produces({ MediaType.TEXT_PLAIN, "application/ifc" })
@@ -202,6 +264,12 @@ public class BIMServerModelUpdate_OpenAPI {
 
 	
 
+	/**
+	 * The service allows a user to download the latest building model release of the BIMserver "project_id"  project in the background BIMserver.
+	 * 
+	 * @param project_id The unique project identifier or name in BIMserver.
+	 * @return ifcFile ifcFile An Industry Foundation Classes (IFC) in STEP MULTIPART_FORM_DATA format: IFC 2x3 and IFC4
+	 */
 	@GET
 	@Path("/download/{project_id}")
 	@Produces({ MediaType.TEXT_PLAIN, "application/ifc" })
