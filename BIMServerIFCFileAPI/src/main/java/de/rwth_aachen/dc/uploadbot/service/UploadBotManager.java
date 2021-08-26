@@ -23,47 +23,55 @@ import de.rwth_aachen.dc.BimServerPasswords;
 
 public class UploadBotManager {
 
-	public File uploadRelease(String projectName, java.nio.file.Path file) {
-		try {
-			JsonBimServerClientFactory factory = new JsonBimServerClientFactory("http://localhost:8090");
-			BimServerClient client = factory.create(
-					new UsernamePasswordAuthenticationInfo(BimServerPasswords.user, BimServerPasswords.password));
+	public void uploadRelease(final String projectName, java.nio.file.Path file) {
 
-			List<SProject> projects = client.getServiceInterface().getAllReadableProjects();
-			boolean project_exists=false;
-			for (SProject p : projects) {
-				if (p.getState() == SObjectState.ACTIVE)
-					if (p.getName().equals(projectName)) {
-						project_exists=true;
-						break;
-					}
-			}
-			
-			if(!project_exists)
-			{
-				SProject p =client.getServiceInterface().addProject(projectName, "ifc2x3tc1"); 
-				
-				SDeserializerPluginConfiguration deserialize=client.getServiceInterface().getSuggestedDeserializerForExtension("ifc", p.getOid());
-				
+		Runnable runnable = () -> {
+			try {
+				JsonBimServerClientFactory factory = new JsonBimServerClientFactory("http://localhost:8090");
+				BimServerClient client = factory.create(
+						new UsernamePasswordAuthenticationInfo(BimServerPasswords.user, BimServerPasswords.password));
+
+				List<SProject> projects = client.getServiceInterface().getAllReadableProjects();
+				String local_projectName = projectName;
+				boolean project_exists = false;
+				SProject p = null;
+				for (SProject pz : projects) {
+					if (pz.getName().equals(projectName))
+						if (pz.getState() == SObjectState.ACTIVE) {
+							project_exists = true;
+							p = pz;
+							break;
+						} else if (pz.getState() == SObjectState.DELETED) {
+
+							local_projectName += "_" + System.currentTimeMillis();
+							break;
+						}
+				}
+
+				if (!project_exists) {
+					p = client.getServiceInterface().addProject(local_projectName, "ifc2x3tc1");
+				}
+				SDeserializerPluginConfiguration deserialize = client.getServiceInterface()
+						.getSuggestedDeserializerForExtension("ifc", p.getOid());
+
 				client.checkinSync(p.getOid(), "AUTOMATIC UPDATE", deserialize.getOid(), false, file);
-				
+
+			} catch (BimServerClientException e) {
+				e.printStackTrace();
+			} catch (ServiceException e) {
+				e.printStackTrace();
+			} catch (ChannelConnectionException e) {
+				e.printStackTrace();
+			} catch (PublicInterfaceNotFoundException e) {
+				e.printStackTrace();
+			} catch (IOException e) {
+				e.printStackTrace();
 			}
-			
-		} catch (BimServerClientException e) {
-			e.printStackTrace();
-		} catch (ServiceException e) {
-			e.printStackTrace();
-		} catch (ChannelConnectionException e) {
-			e.printStackTrace();
-		} catch (PublicInterfaceNotFoundException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		} 
-		return null;
+		};
+		Thread thread = new Thread(runnable);
+		thread.start();
 	}
 
-	
 	public File downloadLastRelease(String projectName) {
 		try {
 			JsonBimServerClientFactory factory = new JsonBimServerClientFactory("http://localhost:8090");

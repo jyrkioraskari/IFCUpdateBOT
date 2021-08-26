@@ -94,7 +94,7 @@ public class BIMServerModelUpdate_OpenAPI {
 	@POST
 	@Path("/upload")
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
-	@Produces({"application/ld+json"})
+	@Produces({MediaType.TEXT_PLAIN})
 	public Response uploadIFCtoProjectAsMultiPartFormData(@FormDataParam("ifcFile") InputStream ifcFile) {
 		try {
 			File tempIfcFile = File.createTempFile("bimserver-", ".ifc");
@@ -103,7 +103,7 @@ public class BIMServerModelUpdate_OpenAPI {
 			Files.copy(ifcFile, tempIfcFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
 			IOUtils.closeQuietly(ifcFile);
 			upload_manager.uploadRelease("default",tempIfcFile.toPath());
-			return Response.ok().build();
+			return Response.ok("Upload thread started.").build();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -116,7 +116,7 @@ public class BIMServerModelUpdate_OpenAPI {
 	@POST
 	@Path("/upload")
 	@Consumes({ MediaType.TEXT_PLAIN, "application/ifc" })
-	@Produces({"application/ld+json"})
+	@Produces({MediaType.TEXT_PLAIN})
 	public Response uploadIFCtoProjectAsTxt(String ifc_step_content) {
 		String project_id="default";
 		try {
@@ -130,8 +130,7 @@ public class BIMServerModelUpdate_OpenAPI {
 			      e.printStackTrace();
 			    }
 			upload_manager.uploadRelease("default",tempIfcFile.toPath());
-			return Response.ok().build();
-
+			return Response.ok("Upload thread started.").build();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
