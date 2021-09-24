@@ -1,6 +1,6 @@
 # IFC Update BOT
 version
-
+0.10.0
 
 To activate the BIMServer connection, copy the Tomcat_config/bim4ren.properties to your <Tomcat>/conf directory and edit the
 properties to contain the needed values. 
