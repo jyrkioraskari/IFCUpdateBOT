@@ -6,32 +6,69 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.List;
 
-import org.bimserver.client.BimServerClient;
-import org.bimserver.client.json.JsonBimServerClientFactory;
+import org.bimserver.BimServer;
+import org.bimserver.database.BimDatabase;
 import org.bimserver.interfaces.objects.SDeserializerPluginConfiguration;
 import org.bimserver.interfaces.objects.SObjectState;
 import org.bimserver.interfaces.objects.SProject;
 import org.bimserver.interfaces.objects.SRevision;
 import org.bimserver.interfaces.objects.SSerializerPluginConfiguration;
+import org.bimserver.plugins.services.BimServerClientInterface;
+import org.bimserver.shared.AuthenticationInfo;
+import org.bimserver.shared.BimServerClientFactory;
 import org.bimserver.shared.ChannelConnectionException;
 import org.bimserver.shared.UsernamePasswordAuthenticationInfo;
 import org.bimserver.shared.exceptions.BimServerClientException;
 import org.bimserver.shared.exceptions.PublicInterfaceNotFoundException;
 import org.bimserver.shared.exceptions.ServiceException;
 
-import de.rwth_aachen.dc.BimServerPasswords;
+import de.rwth_aachen.dc.bimserver.BimServerPasswords;
+import de.rwth_aachen.dc.bimserver.BimServerPasswords.BimServerContext;
 
 public class UploadBotManager {
 
-	public void uploadRelease(final String projectName, java.nio.file.Path file) {
+	final BimServer bimServer;
+	BimServerClientInterface client;
+	final BimServerContext credentials;
 
+	public UploadBotManager(BimServer bimServer) {
+		this.bimServer = bimServer;
+		this.credentials = de.rwth_aachen.dc.bimserver.BimServerPasswords.getContext();
+		
+		BimDatabase bimDatabase = bimServer.getDatabase();
+		BimServerClientFactory clientFactory = bimServer.getBimServerClientFactory();
+		try {
+			
+			AuthenticationInfo authentication_info;
+			if(this.credentials==null)
+			  authentication_info= new UsernamePasswordAuthenticationInfo("bim4en@bimserver.org","aaddmin");
+			else
+			  authentication_info= new UsernamePasswordAuthenticationInfo(credentials.bimserver_user,credentials.bimserver_password);
+				
+			this.client = clientFactory.create(authentication_info);
+
+		} catch (ServiceException | ChannelConnectionException e) {
+			e.printStackTrace();
+		}
+	}
+
+	
+	public void uploadRelease(final String projectName, java.nio.file.Path file) {
+		if (this.credentials == null) {
+			System.err.println("No username or password for BIMserver.");
+			return;
+		}
 		Runnable runnable = () -> {
 			try {
-				JsonBimServerClientFactory factory = new JsonBimServerClientFactory("http://localhost:8090");
-				BimServerClient client = factory.create(
-						new UsernamePasswordAuthenticationInfo(BimServerPasswords.user, BimServerPasswords.password));
+				/*
+				 * JsonBimServerClientFactory factory = new
+				 * JsonBimServerClientFactory("http://localhost:8090"); BimServerClient client =
+				 * factory.create( new
+				 * UsernamePasswordAuthenticationInfo(BimServerPasswords.user,
+				 * BimServerPasswords.password));
+				 */
 
-				List<SProject> projects = client.getServiceInterface().getAllReadableProjects();
+				List<SProject> projects = this.client.getServiceInterface().getAllReadableProjects();
 				String local_projectName = projectName;
 				boolean project_exists = false;
 				SProject p = null;
@@ -56,11 +93,7 @@ public class UploadBotManager {
 
 				client.checkinSync(p.getOid(), "AUTOMATIC UPDATE", deserialize.getOid(), false, file);
 
-			} catch (BimServerClientException e) {
-				e.printStackTrace();
 			} catch (ServiceException e) {
-				e.printStackTrace();
-			} catch (ChannelConnectionException e) {
 				e.printStackTrace();
 			} catch (PublicInterfaceNotFoundException e) {
 				e.printStackTrace();
@@ -74,11 +107,15 @@ public class UploadBotManager {
 
 	public File downloadLastRelease(String projectName) {
 		try {
-			JsonBimServerClientFactory factory = new JsonBimServerClientFactory("http://localhost:8090");
-			BimServerClient client = factory.create(
-					new UsernamePasswordAuthenticationInfo(BimServerPasswords.user, BimServerPasswords.password));
+			/*
+			 * JsonBimServerClientFactory factory = new
+			 * JsonBimServerClientFactory("http://localhost:8090"); BimServerClient client =
+			 * factory.create( new
+			 * UsernamePasswordAuthenticationInfo(BimServerPasswords.user,
+			 * BimServerPasswords.password));
+			 */
 
-			List<SProject> projects = client.getServiceInterface().getAllReadableProjects();
+			List<SProject> projects = this.client.getServiceInterface().getAllReadableProjects();
 			byte[] data = null;
 			for (SProject p : projects) {
 				if (p.getState() == SObjectState.ACTIVE)
@@ -104,8 +141,6 @@ public class UploadBotManager {
 		} catch (BimServerClientException e) {
 			e.printStackTrace();
 		} catch (ServiceException e) {
-			e.printStackTrace();
-		} catch (ChannelConnectionException e) {
 			e.printStackTrace();
 		} catch (PublicInterfaceNotFoundException e) {
 			e.printStackTrace();

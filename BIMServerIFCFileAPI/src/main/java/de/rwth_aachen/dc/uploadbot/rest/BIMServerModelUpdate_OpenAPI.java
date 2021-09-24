@@ -5,10 +5,12 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.mail.FolderClosedException;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -22,10 +24,25 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.UriInfo;
 
 import org.apache.commons.io.IOUtils;
+import org.bimserver.BimServer;
+import org.bimserver.BimServerConfig;
+import org.bimserver.BimserverDatabaseException;
+import org.bimserver.database.BimDatabase;
+import org.bimserver.database.DatabaseRestartRequiredException;
+import org.bimserver.database.berkeley.DatabaseInitException;
+import org.bimserver.shared.AuthenticationInfo;
+import org.bimserver.shared.BimServerClientFactory;
+import org.bimserver.shared.ChannelConnectionException;
+import org.bimserver.shared.LocalDevelopmentResourceFetcher;
+import org.bimserver.shared.UsernamePasswordAuthenticationInfo;
+import org.bimserver.shared.exceptions.PluginException;
+import org.bimserver.shared.exceptions.ServerException;
+import org.bimserver.shared.exceptions.ServiceException;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 
 import com.google.gson.Gson;
 
+import de.rwth_aachen.dc.bimserver.BIMServer_factory;
 import de.rwth_aachen.dc.uploadbot.data.Service;
 import de.rwth_aachen.dc.uploadbot.service.UpdateBotManager;
 import de.rwth_aachen.dc.uploadbot.service.UploadBotManager;
@@ -37,11 +54,14 @@ import de.rwth_aachen.dc.uploadbot.service.UploadBotManager;
 
 @Path("/")
 public class BIMServerModelUpdate_OpenAPI {
-	UploadBotManager upload_manager = new UploadBotManager();
-	UpdateBotManager update_manager = new UpdateBotManager();
+	final UploadBotManager upload_manager ;
+	final UpdateBotManager update_manager = new UpdateBotManager();
 	
-
-	
+	public BIMServerModelUpdate_OpenAPI()
+	{
+		BimServer bimServer = BIMServer_factory.get_instance();
+		this.upload_manager= new UploadBotManager(bimServer);
+	}
 	
 	/**
 	 * The Open BIMserver BIM Bot description specification of the services
@@ -105,7 +125,7 @@ public class BIMServerModelUpdate_OpenAPI {
 	}
 
 	/**
-	 * The service uploads a building model to the default project background BIMserver instance. If a
+	 * The service uploads a building model to the default project embedded BIMserver instance. If a
 	 * project already exists and is not deleted, a new release is created. In the case the project is
 	 * deleted a new project with a time stamp is created.
 	 * 
@@ -138,7 +158,7 @@ public class BIMServerModelUpdate_OpenAPI {
 	
 
 	/**
-	 * The service uploads a building model to the default project background BIMserver instance. If a
+	 * The service uploads a building model to the default project embedded BIMserver instance. If a
 	 * project already exists and is not deleted, a new release is created. In the case the project is
 	 * deleted a new project with a time stamp is created.
 	 * 
@@ -174,7 +194,7 @@ public class BIMServerModelUpdate_OpenAPI {
 	}
 	
 	/**
-	 * The service uploads a building model to the BIMserver "project_id" project background BIMserver instance. If a
+	 * The service uploads a building model to the BIMserver "project_id" project embedded BIMserver instance. If a
 	 * project already exists and is not deleted, a new release is created. In the case the project is
 	 * deleted a new project with a time stamp is created.
 	 * 
@@ -207,7 +227,7 @@ public class BIMServerModelUpdate_OpenAPI {
 	
 	
 	/**
-	 * The service uploads a building model to the BIMserver "project_id"  project background BIMserver instance. If a
+	 * The service uploads a building model to the BIMserver "project_id"  project embedded BIMserver instance. If a
 	 * project already exists and is not deleted, a new release is created. In the case the project is
 	 * deleted a new project with a time stamp is created.
 	 * 
@@ -246,7 +266,7 @@ public class BIMServerModelUpdate_OpenAPI {
 	
 
 	/**
-	 * The service allows a user to download the latest building model release of the default project in the background BIMserver.
+	 * The service allows a user to download the latest building model release of the default project in the embedded BIMserver.
 	 * 
 	 * @return ifcFile ifcFile An Industry Foundation Classes (IFC) in STEP MULTIPART_FORM_DATA format: IFC 2x3 and IFC4
 	 */
@@ -265,7 +285,7 @@ public class BIMServerModelUpdate_OpenAPI {
 	
 
 	/**
-	 * The service allows a user to download the latest building model release of the BIMserver "project_id"  project in the background BIMserver.
+	 * The service allows a user to download the latest building model release of the BIMserver "project_id"  project in the embedded BIMserver.
 	 * 
 	 * @param project_id The unique project identifier or name in BIMserver.
 	 * @return ifcFile ifcFile An Industry Foundation Classes (IFC) in STEP MULTIPART_FORM_DATA format: IFC 2x3 and IFC4
