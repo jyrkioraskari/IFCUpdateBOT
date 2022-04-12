@@ -4,10 +4,10 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.List;
 
-import org.bimserver.BimServer;
-import org.bimserver.database.BimDatabase;
+import org.bimserver.client.json.JsonBimServerClientFactory;
 import org.bimserver.interfaces.objects.SDeserializerPluginConfiguration;
 import org.bimserver.interfaces.objects.SObjectState;
 import org.bimserver.interfaces.objects.SProject;
@@ -15,41 +15,41 @@ import org.bimserver.interfaces.objects.SRevision;
 import org.bimserver.interfaces.objects.SSerializerPluginConfiguration;
 import org.bimserver.plugins.services.BimServerClientInterface;
 import org.bimserver.shared.AuthenticationInfo;
-import org.bimserver.shared.BimServerClientFactory;
 import org.bimserver.shared.ChannelConnectionException;
 import org.bimserver.shared.UsernamePasswordAuthenticationInfo;
 import org.bimserver.shared.exceptions.BimServerClientException;
 import org.bimserver.shared.exceptions.PublicInterfaceNotFoundException;
 import org.bimserver.shared.exceptions.ServiceException;
 
-import de.rwth_aachen.dc.bimserver.BimServerPasswords;
 import de.rwth_aachen.dc.bimserver.BimServerPasswords.BimServerContext;
 
 public class UploadBotManager {
 
-	final BimServer bimServer;
 	BimServerClientInterface client;
 	final BimServerContext credentials;
 
-	public UploadBotManager(BimServer bimServer) {
-		this.bimServer = bimServer;
+	public UploadBotManager() {
 		this.credentials = de.rwth_aachen.dc.bimserver.BimServerPasswords.getContext();
 		
-		BimDatabase bimDatabase = bimServer.getDatabase();
-		BimServerClientFactory clientFactory = bimServer.getBimServerClientFactory();
+		JsonBimServerClientFactory factory;
 		try {
-			
+			factory = new JsonBimServerClientFactory("http://localhost:8080/bimserverwar-1.5.182/");
+
 			AuthenticationInfo authentication_info;
 			if(this.credentials==null)
 			  authentication_info= new UsernamePasswordAuthenticationInfo("bim4en@bimserver.org","aaddmin");
 			else
 			  authentication_info= new UsernamePasswordAuthenticationInfo(credentials.bimserver_user,credentials.bimserver_password);
 				
-			this.client = clientFactory.create(authentication_info);
+			this.client = factory.create(authentication_info);
 
 		} catch (ServiceException | ChannelConnectionException e) {
 			e.printStackTrace();
+		} catch (BimServerClientException e) {
+			e.printStackTrace();
 		}
+	
+
 	}
 
 	
@@ -60,14 +60,7 @@ public class UploadBotManager {
 		}
 		Runnable runnable = () -> {
 			try {
-				/*
-				 * JsonBimServerClientFactory factory = new
-				 * JsonBimServerClientFactory("http://localhost:8090"); BimServerClient client =
-				 * factory.create( new
-				 * UsernamePasswordAuthenticationInfo(BimServerPasswords.user,
-				 * BimServerPasswords.password));
-				 */
-
+				
 				List<SProject> projects = this.client.getServiceInterface().getAllReadableProjects();
 				String local_projectName = projectName;
 				boolean project_exists = false;
@@ -88,8 +81,10 @@ public class UploadBotManager {
 				if (!project_exists) {
 					p = client.getServiceInterface().addProject(local_projectName, "ifc2x3tc1");
 				}
+				System.out.println("project"+p.getName());
 				SDeserializerPluginConfiguration deserialize = client.getServiceInterface()
 						.getSuggestedDeserializerForExtension("ifc", p.getOid());
+				System.out.println("project"+deserialize);
 
 				client.checkinSync(p.getOid(), "AUTOMATIC UPDATE", deserialize.getOid(), false, file);
 
@@ -107,13 +102,7 @@ public class UploadBotManager {
 
 	public File downloadLastRelease(String projectName) {
 		try {
-			/*
-			 * JsonBimServerClientFactory factory = new
-			 * JsonBimServerClientFactory("http://localhost:8090"); BimServerClient client =
-			 * factory.create( new
-			 * UsernamePasswordAuthenticationInfo(BimServerPasswords.user,
-			 * BimServerPasswords.password));
-			 */
+			
 
 			List<SProject> projects = this.client.getServiceInterface().getAllReadableProjects();
 			byte[] data = null;
@@ -148,5 +137,54 @@ public class UploadBotManager {
 			e.printStackTrace();
 		}
 		return null;
+	}
+	
+	
+	public static void main(String[] args) {
+		JsonBimServerClientFactory factory;
+		try {
+			factory = new JsonBimServerClientFactory("http://localhost:8080/bimserverwar-1.5.182/");
+
+			AuthenticationInfo authentication_info= new UsernamePasswordAuthenticationInfo("jyrki@testi.fi","abborre");
+				
+			BimServerClientInterface client = factory.create(authentication_info);
+			
+			
+			
+			List<SProject> projects = client.getServiceInterface().getAllReadableProjects();
+			String local_projectName = "test";
+			boolean project_exists = false;
+			SProject p = null;
+			for (SProject pz : projects) {
+				if (pz.getName().equals("test"))
+					if (pz.getState() == SObjectState.ACTIVE) {
+						project_exists = true;
+						p = pz;
+						break;
+					} else if (pz.getState() == SObjectState.DELETED) {
+
+						local_projectName += "_" + System.currentTimeMillis();
+						break;
+					}
+			}
+
+			if (!project_exists) {
+				p = client.getServiceInterface().addProject(local_projectName, "ifc2x3tc1");
+			}
+			System.out.println("project "+p.getName());
+			SDeserializerPluginConfiguration deserialize = client.getServiceInterface()
+					.getSuggestedDeserializerForExtension("ifc", p.getOid());
+			System.out.println("deserialize "+deserialize);
+			java.nio.file.Path file=Paths.get("C:\\jo\\2022_01_xeokit_conversion\\Duplex_A_20110907.ifc");
+			client.checkinSync(p.getOid(), "AUTOMATIC UPDATE", deserialize.getOid(), false, file);
+
+		} catch (ServiceException | ChannelConnectionException e) {
+			e.printStackTrace();
+		} catch (BimServerClientException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	
 	}
 }

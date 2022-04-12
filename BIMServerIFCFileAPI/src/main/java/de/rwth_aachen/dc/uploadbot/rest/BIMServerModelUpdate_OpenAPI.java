@@ -59,8 +59,7 @@ public class BIMServerModelUpdate_OpenAPI {
 	
 	public BIMServerModelUpdate_OpenAPI()
 	{
-		BimServer bimServer = BIMServer_factory.get_instance();
-		this.upload_manager= new UploadBotManager(bimServer);
+		this.upload_manager= new UploadBotManager();
 	}
 	
 	/**
