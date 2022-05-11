@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>de.rwth-aachen.dc.b4r</groupId>
 	<artifactId>StarDogUploadBotAPI</artifactId>
-	<version>0.10</version>
+	<version>1.0</version>
 	<packaging>war</packaging>
 	<name>Stardog IFC File OpenAPI 2.0</name>
 
@@ -41,7 +41,7 @@
 					<groupId>com.webcohesion.enunciate</groupId>
 					<artifactId>enunciate-maven-plugin</artifactId>
 					<version>2.13.3</version>
-					<configuration>
+					<configuration>                         
 						<docsDir>${project.build.directory}/StarDogUploadBotAPI</docsDir>
 						<configFile>src/conf/enunciate.xml</configFile>
 					</configuration>

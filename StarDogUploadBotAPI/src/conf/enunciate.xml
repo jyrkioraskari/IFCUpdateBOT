@@ -5,7 +5,7 @@
 	
 	
 	<modules>
-		<swagger  basePath="/BIMServerIFCFileAPI/api/">	   
+		<swagger  basePath="/StarDogUploadBotAPI/api/">	   
 		</swagger>
 	</modules>
 	<api-classes>
