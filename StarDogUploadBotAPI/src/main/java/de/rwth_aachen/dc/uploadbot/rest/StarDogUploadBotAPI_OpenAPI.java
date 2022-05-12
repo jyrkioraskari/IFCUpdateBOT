@@ -23,6 +23,7 @@ import org.glassfish.jersey.media.multipart.FormDataParam;
 import com.google.gson.Gson;
 
 import de.rwth_aachen.dc.uploadbot.data.Service;
+import de.rwth_aachen.dc.uploadbot.service.UploadBotStardogManager;
 
 
 /*
@@ -32,6 +33,7 @@ import de.rwth_aachen.dc.uploadbot.data.Service;
 
 @Path("/")
 public class StarDogUploadBotAPI_OpenAPI {
+	final UploadBotStardogManager update_manager = new UploadBotStardogManager();
 	
 	public StarDogUploadBotAPI_OpenAPI()
 	{
@@ -65,14 +67,14 @@ public class StarDogUploadBotAPI_OpenAPI {
 	@Path("/upload")
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
 	@Produces({MediaType.TEXT_PLAIN})
-	public Response uploadIFCtoProjectAsMultiPartFormData(@FormDataParam("ifcFile") InputStream ifcFile) {
+	public Response upload(@FormDataParam("ttlFile") InputStream ttlFile) {
 		try {
-			File tempIfcFile = File.createTempFile("bimserver-", ".ifc");
+			File tempIfcFile = File.createTempFile("ttl-", ".ttl");
 			tempIfcFile.deleteOnExit();
 
-			Files.copy(ifcFile, tempIfcFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
-			IOUtils.closeQuietly(ifcFile);
-			//upload_manager.uploadRelease("default",tempIfcFile.toPath());
+			Files.copy(ttlFile, tempIfcFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+			IOUtils.closeQuietly(ttlFile);
+			this.update_manager.uploadTTL(tempIfcFile.toPath());
 			return Response.ok("Upload thread started.").build();
 		} catch (Exception e) {
 			e.printStackTrace();
