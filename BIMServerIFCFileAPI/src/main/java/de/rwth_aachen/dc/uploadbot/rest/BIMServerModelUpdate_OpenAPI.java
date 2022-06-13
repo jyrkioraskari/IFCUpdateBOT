@@ -137,7 +137,7 @@ public class BIMServerModelUpdate_OpenAPI {
 	@POST
 	@Path("/upload")
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
-	@Produces({MediaType.TEXT_PLAIN})
+	@Produces({ "application/ld+json"})
 	public Response uploadIFCtoProjectAsMultiPartFormData(@FormDataParam("ifcFile") InputStream ifcFile) {
 		try {
 			File tempIfcFile = File.createTempFile("bimserver-", ".ifc");
@@ -146,7 +146,9 @@ public class BIMServerModelUpdate_OpenAPI {
 			Files.copy(ifcFile, tempIfcFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
 			IOUtils.closeQuietly(ifcFile);
 			upload_manager.uploadRelease("default",tempIfcFile.toPath());
-			return Response.ok("Upload thread started.").build();
+			
+			String json = new Gson().toJson("Upload thread started.");
+			return Response.ok(json, "application/json").build();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
